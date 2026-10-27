@@ -78,3 +78,5 @@ x = np.array([10, 20, 30])
 y = np.array([15, 20, 25])
 print(x >= y)
 print(x[(x < 20) | (x == 30)])
+
+
