@@ -108,3 +108,21 @@ df_merged = pd.merge(df_info, df_score, on="ID", how='inner')
 print(df_merged)
 df_merged = pd.merge(df_info, df_score, on="ID", how='outer')
 print(df_merged)
+
+# 15] 정렬, df.sort
+df = pd.DataFrame({
+  'name': ['Ant', 'Bee', 'Cat', 'Dog'],
+  'age': [27, 27, 22, 32],
+  'score': [88, 95, 85, 90]
+})
+new_df = df.sort_values(by = 'age', ascending=True)
+print(new_df)
+# 다중정렬은 [] 리스트 사용, 'age' 기준으로 1ㅇ차 정렬 후 동일한 age끼리 score기준으로 2차정렬
+new_df = df.sort_values(by = ['age', 'score'], ascending=[True, True])
+print(new_df)
+
+new_df = df.sort_index(axis=1, ascending=True)
+print(new_df)
+
+new_df = df.sort_index(axis=0, ascending=True)
+print(new_df)
