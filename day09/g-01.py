@@ -25,6 +25,7 @@ plt.ylabel("loss")  # y축 제목
 plt.grid() # 구분 선
 plt.legend() # 범례 표시
 
+plt.show()
 # 2] 막대 차트(비교) plt.bar , 선 차트(추세) ,
 classes = ['Cat', 'Dog', 'Bird', 'Fish']
 counts = [120, 150, 80, 45]
@@ -38,6 +39,7 @@ plt.xlabel('class')
 plt.ylabel('sample count')
 plt.grid(True, alpha=0.5)
 
+plt.show()
 # 3] 산점도(상관관계)
 x = [1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5]
 y = [2.3, 3.8, 5.1, 7.0, 7.8, 9.2, 10.5]
@@ -48,7 +50,7 @@ plt.title('studying time and test score of correlation')
 plt.xlabel('studying time')
 plt.ylabel('test score')
 
-
+plt.show()
 # 4] 히스토그램 (연속형 수치/값 분포)
 import numpy as np
 # 평균 170을 중심으로 표준편차 5만큼 퍼져있는 종모양
@@ -58,12 +60,14 @@ heights = np.random.normal(loc=170, scale=5, size=1000)
 plt.hist(heights, bins=30, edgecolor='black')
 plt.xlabel("heights(cm)")
 plt.ylabel("Frequency/Distribution")
+plt.show()
 
 # 5] 박스 플롯 (분포 범위내 이상치)
 heights = np.random.normal(loc=170, scale=5, size=1000)
 data_with_outliers = np.append(heights, [210, 215, 120])
 # 1) plt.boxplot(값, ) 데이터들을 사분위수(25%, 50%, 75%) 표현
 plt.boxplot(data_with_outliers)
+plt.show()
 
 # 6] 한 차트에 2개 이상 그래프 표현
 # fig, axs = plt.subplots(행개수, 열개수, figsize=(가로, 세로))
