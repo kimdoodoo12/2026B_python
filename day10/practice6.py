@@ -23,35 +23,35 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-# df = pd.read_csv( 'day10\\train.csv')
-# # filling median value in Age Column for Robust analysis to outlier
-# df['Age'] = df['Age'].fillna(df['Age'].median())
-# # filling Mode value in Embardked Column such as 61, 829 Passenger ID
-# df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
+df = pd.read_csv( 'day10\\train.csv')
+# filling median value in Age Column for Robust analysis to outlier
+df['Age'] = df['Age'].fillna(df['Age'].median())
+# filling Mode value in Embardked Column such as 61, 829 Passenger ID
+df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
 
-# # 5-1 Survival Analysis
-# print(pd.concat([df[df['Survived'] == 1], df[df['Survived'] == 0]]))
-# print(df['Survived'].value_counts())
-# plt.bar(['Dead', 'Alive'], [len(df[df['Survived'] == 0]), len(df[df['Survived'] == 1])], color=['red', 'blue'])
-# plt.show()
+# 5-1 Survival Analysis
+print(pd.concat([df[df['Survived'] == 1], df[df['Survived'] == 0]]))
+print(df['Survived'].value_counts())
+plt.bar(['Dead', 'Alive'], [len(df[df['Survived'] == 0]), len(df[df['Survived'] == 1])], color=['red', 'blue'])
+plt.show()
 
-# # 5-2 Detailed analysis by age group
-# sns.histplot(data=df, x='Age', hue='Survived', kde=True)
-# plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
-# plt.show()
+# 5-2 Detailed analysis by age group
+sns.histplot(data=df, x='Age', hue='Survived', kde=True)
+plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
+plt.show()
 
-# # 5-4 Survived People Rate by Sex Countplot
-# sns.countplot(data=df, x=df['Sex'], hue='Survived')
-# plt.grid()
-# plt.title('Survival Rate by Sex')
-# plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
-# plt.show()
+# 5-4 Survived People Rate by Sex Countplot
+sns.countplot(data=df, x=df['Sex'], hue='Survived')
+plt.grid()
+plt.title('Survival Rate by Sex')
+plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
+plt.show()
 
-# # 5-5 Survived People Rate by Pclass 
-# sns.countplot(data=df, x=df['Pclass'], hue='Survived')
-# plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
-# plt.xticks([0, 1, 2], ['1st', '2nd', '3rd'])
-# plt.show()
+# 5-5 Survived People Rate by Pclass 
+sns.countplot(data=df, x=df['Pclass'], hue='Survived')
+plt.legend(title='Survival', labels=['dead(0)', 'alive(1)'])
+plt.xticks([0, 1, 2], ['1st', '2nd', '3rd'])
+plt.show()
 
 
 # [1. 서울시 공공자전거 대여이력 분석]
