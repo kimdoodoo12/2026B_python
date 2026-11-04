@@ -41,8 +41,9 @@ def get_data():
     industry_data = df.groupby('업종').agg(
         평균가격=('가격', 'mean')
     )
+    print(industry_data)
     plt.figure(figsize=(10, 5))
-    sns.barplot(industry_data, x= '업종', y='평균가격')
+    sns.barplot(data=industry_data, x= '업종', y='평균가격')
     plt.show()
 
 get_data()
