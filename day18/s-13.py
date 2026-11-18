@@ -60,6 +60,79 @@ print(pred[:10])
 # 5) HDBSCAN # k-means와 다르게 밀도 기반으로 군집, 이상치(-1) 자동탐지
 from sklearn.cluster import HDBSCAN
 # model = HDBSCAN(min_cluster=군집하기위한 최소데이터수, mix_samples=군집판별할때 계산되는 이웃수)
+# min_cluster_size : 클수록 군집수 적어진다. # min_samples : 클수록 이상치 많아진다.
 model = HDBSCAN(min_cluster_size=15, min_samples=5)
 pred = model.fit_predict(X_train_scaled)
 print(pred) # 군집/그룹 4개 , # 이상치 1개(-1)
+X_train['hdb_cluster'] = pred
+print(X_train['hdb_cluster'].value_counts())
+# 0     194, 1      85 , 2      56 , -1     32 , 3      20
+# min_cluster_size, min_samples     15.5 -> 30.2
+# 1     184 , 2     89 , 0      81 , -1     33
+# 시각화 : 
+noise_mask = (X_train['hdb_cluster'] == -1)
+plt.scatter(X_train.loc[~noise_mask, 'G3'], X_train.loc[~noise_mask, 'absences'], c=X_train.loc[~noise_mask, 'hdb_cluster']) # ~은 부정
+plt.scatter(X_train.loc[noise_mask, 'G3'], X_train.loc[noise_mask, 'absences'], c='red', marker='*') # ~은 부정
+plt.show()
+
+
+# 6) PCA(주성분 분석) : 고차원 데이터의 분산을 저차원으로 축소
+# 고차원이란? 다수의 특성들의 가중치/기울기 표현 , 상관계수란 A특성과 B특성의 관계성(A가 변경되면 B가 얼마나 변경이 됐나)
+from sklearn.decomposition import PCA
+# PCA(n_components=차원수)
+pca = PCA(n_components=2) # 시각화(2D)가 하기위한 2차원 축소
+## 딥러닝 (이미지 3차원 -> RGB(1)(2)(3)장수(4)) -> 흑백 -> G(1)장수(2))
+# 사진에 고양이의 유무 컬러 사진 -> 흑백으로 차원 축소 
+X_train_pca = pca.fit_transform(X_train_scaled)
+print(X_train_pca)      # 행마다의 가중치
+print(pca.components_.T)# 주 특성별 가중치
+#   주성분1     주성분2         공부시간
+# [[ 0.13219328 -0.61408979]    결석일수
+# [-0.00599139  0.78051288]     1학기성적
+# [ 0.56213845  0.00343157]     2학기성적
+# [ 0.58342273  0.03443535]     3학기성적
+# [ 0.57105808  0.11178463]]    
+# 주성분1에서 강한 1/2/3 학기 성적
+pca_hdb = HDBSCAN(min_cluster_size=30, min_samples=5)
+pca_pred = pca_hdb.fit_predict(X_train_pca) # 5차원에서 2차원으로 축소
+X_train['PC1'] = X_train_pca[ : , 0]
+X_train['PC2'] = X_train_pca[ : , 1]
+X_train['PCA_cluster'] = pca_pred
+
+print(X_train.head(5))
+
+# 7) 이상치 제외한 G3 평균 계산
+normal_clusters = X_train[X_train['PCA_cluster'] != -1]
+cluster_means = normal_clusters.groupby('PCA_cluster')['G3'].mean()
+sorted_cluster = cluster_means.sort_values(ascending=True)
+print(sorted_cluster)
+# PCA_cluster       클러스터별 G3 평균 점수 == PC1 가중치: 예측 비교
+# 1     9.873239
+# 0    12.500000
+# 2    13.641509
+
+# 8) 라벨링
+# enumerate() # range()
+labels = { }
+for idx, cluster_id in enumerate(sorted_cluster.index, start=1):
+    labels[cluster_id] = f'Level{idx}'
+labels[-1] = 'Outlier' # 이상치는 리스트 가장 뒤에
+print(labels)
+# {1: 'Level1', 0: 'Level2', 2: 'Level3', -1: 'Outlier'}
+X_train['pca_cluster_label'] = X_train['PCA_cluster'].replace(labels)
+print(X_train) # 군진화한 결과 가지고 지도학습
+
+# 지도학습에서 성능 향상 하기 위한 방법: 1) 하이퍼파라미터 설정 2) 파생변수
+
+# 9) 시각화
+for lbl in list(labels.values()):
+    sub = X_train[X_train['pca_cluster_label'] == lbl]
+    if lbl == 'Outlier':
+        plt.scatter(sub['PC1'], sub['PC2'], c='red', marker='*')
+    else:
+        plt.scatter(sub['PC1'], sub['PC2'], marker='o', label=lbl)
+
+plt.legend()
+plt.show()
+# PCA 시각화 하게 되면 특성들을 2가지(2D) 형태 표현 가능하다
+# 현재 주성분 PC1(G1 G2 G3) , PC2(공부시간, 결석일수)
