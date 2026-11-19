@@ -76,7 +76,8 @@ X['cluster_label'] = X['cluster'].replace(label_map)
 colors = [ 'blue' , 'red','black']
 i = 0
 for label in list(label_map.values()):
-    plt.scatter(X['PC1'], X['PC2'], marker='o', label=label  , colors=colors[i] )
+    sub= X[ X['cluster_label'] == label ] 
+    plt.scatter(sub['PC1'], sub['PC2'], marker='o', label=label  )
     i+=1
 plt.legend()
 plt.show()

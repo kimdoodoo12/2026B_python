@@ -1,0 +1,57 @@
+import pandas as pd
+url = "https://raw.githubusercontent.com/bab2min/corpus/master/sentiment/naver_shopping.txt"
+df = pd.read_table(url, names=['rating', 'review'])
+df = df[df['rating'] != 3]
+df['label'] = (df['rating'] >= 4).astype(int)
+df_sample = df.sample(n=5000, random_state=42).reset_index(drop=True)
+
+# 전체 데이터셋에서 특정 n개 샘플링
+# df_sample = df.sample(n=5000, random_state=42).reset_index(drop=True)
+
+print(df_sample.shape)
+# 1) 텍스트에서 전처리 = 정규표현식 자주 사용됨 vs 리액트/js 입력 유효성 검사
+import re # 정규표현식 함수
+cleaned_list = []
+for text in df_sample['review']:
+    # re.sub(r'[표현식]', '치환문자' , str())
+    text = re.sub(r'^가-힣a-zA-Z0-9', ' ', str(text))
+    # .join vs .split
+    cleaned_text = ' '.join(text.split()) # '대한 민국' -> ['대한', '민국'] -> 대한 민국
+    cleaned_list.append(cleaned_text)
+df_sample['cleaned_review'] = cleaned_list
+print(df_sample.head(3))
+
+# 2) 한국어 형태소 분석기 , kiwi
+# 설치 : pip install kiwi
+from kiwipiepy import Kiwi
+kiwi = Kiwi() # 한국어 형태소 분석기 객체 생성
+# 사전 학습에 없는 단어 추가
+for word in ['가성비', '내돈내산', '총알배송']: 
+    # kiwi.add_user_word('새로운단어', '품사키워드')
+    kiwi.add_user_word(word , 'NNG')
+
+# 4. 불용어: 핵심의미가 없는 형태소를 1차적으로 걸러내기 위해
+from kiwipiepy.utils import Stopwords
+kiwi_stopwords = Stopwords()
+custom_stopwords = {'그냥', '그저', '모른다'}
+# 5. kiwi 이용한 형태소 분석 함수
+def tokenize_kiwi(text):
+    # kiwi.tokenize(분석할문장, stopwords=불용어객체)
+    tokens = kiwi.tokenize(text, stopwords=kiwi_stopwords)
+    # 추출할 품사 키워드 , NNG일반명사 , NNP 고유명사, VV동사 VA형용사 MAG일반부사
+    target_tags={'NNG', 'NNP', 'VV', 'VA', 'MAG'}
+    result = []
+    for t in tokens : # 토크나이즈가 된 리스트에서 원하는것만 필터링/추출
+        # t.tag: 품사 , t.form 형태소 문자열 반환
+        if t.tag in target_tags and t.form not in custom_stopwords: # 내가 원하는 품사에 포함된 단어이면
+            if len(t.form) > 1 or t.form in {'안','못', '잘'}: # 일부 제외한 한단어 제외
+                # 동사와 형용사 어간 뒤에 '다' 붙인다
+                # 파이썬 삼항 연산자 : 표현식 if 조건 else 거짓
+                word = t.form + '다' if t.tag in {'VV', 'VA'} else t.form
+                result.append(word)                
+    return result
+
+print(df_sample['cleaned_review'].iloc[0])
+print(tokenize_kiwi(df_sample['cleaned_review'].iloc[0]))
+# 마감이 안좋아요...실밥도 많고 바느질도 부족한 부분이 몇군데 있네요...교환받기 귀찮아서 그냥 씁니다
+# ['마감', '실밥', '바느질', '부족', '부분', '교환', '귀찮다']
